@@ -64,13 +64,15 @@ def get_graph(max_size):
 
 
 def generate_graphs(max_num_nodes, max_num_edges, max_size):
-    t = 0.9
     its_no_update = 0
 
     global num_nodes, num_edges, edges, teleports
-    global R, F, B, T
+    global path, tree, bipartite, cycle
 
-    while num_nodes < max_num_nodes*t and num_edges < max_num_edges*t:
+    print('Max num nodes {:,}'.format(max_num_nodes))
+    print('Max num edges {:,}\n'.format(max_num_edges))
+
+    while num_nodes < max_num_nodes and num_edges < max_num_edges:
         if its_no_update > 50:
             break
 
@@ -85,17 +87,19 @@ def generate_graphs(max_num_nodes, max_num_edges, max_size):
             num_edges += g_edges
 
             if g_type == 1:
-                R += 1
+                path += 1
             elif g_type == 2:
-                F += 1
+                tree += 1
             elif g_type == 3:
-                B += 1
+                bipartite += 1
             elif g_type == 4:
-                T += 1
+                cycle += 1
         else:
             its_no_update += 1
             max_size /= 2
 
+    print("Num nodes: {:,}".format(num_nodes))
+    print("Num edges: {:,}\n".format(num_edges))
 
 def main(max_num_nodes, max_num_edges, max_size, seed, output_file):
     np.random.seed(seed)
@@ -110,16 +114,17 @@ def main(max_num_nodes, max_num_edges, max_size, seed, output_file):
     edges = []
     teleports = []
 
-    global R, F, B, T
-    R, F, B, T = 0, 0, 0, 0
+    global path, tree, bipartite, cycle
+    path, tree, bipartite, cycle = 0, 0, 0, 0
 
-    generate_graphs(max_num_edges, max_num_nodes, max_size)
+    generate_graphs(max_num_nodes, max_num_edges, max_size)
 
     for i in range(1, num_nodes + 1):
         teleports.append(tuple((i, i)))
 
-    print('R: {} - F: {} - B: {} - T: {}'.format(R, F, B, T))
-    print('Total:', R+F+B+T)
+    print('path: {} - tree: {} - bipartite: {} - cycle: {}'.format(path,
+                                                                   tree, bipartite, cycle))
+    print('Total:', path+tree+bipartite+cycle)
 
     with open(output_file, 'w') as f:
         f.write('{} {}\n'.format(num_nodes, num_edges))
@@ -134,10 +139,10 @@ def main(max_num_nodes, max_num_edges, max_size, seed, output_file):
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-n', '--max-num-nodes', type=int, default=100000,
+    parser.add_argument('-n', '--max-num-nodes', type=int, default=10**5,
                         help='Maximum number of nodes.')
 
-    parser.add_argument('-m', '--max-num-edges', type=int, default=1000000,
+    parser.add_argument('-m', '--max-num-edges', type=int, default=10**6,
                         help='Maximum number of edges.')
 
     parser.add_argument('-l', '--max-ship-size', required=True, type=int,
@@ -155,10 +160,10 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
 
-    if (args.max_num_nodes < 10 or args.max_num_nodes > 100000):
+    if (args.max_num_nodes < 10 or args.max_num_nodes > 10**5):
         sys.exit('max_num_nodes must be >= 10 and <= 100000.')
 
-    if args.max_num_edges < 8 or args.max_num_edges > 1000000:
+    if args.max_num_edges < 8 or args.max_num_edges > 10**6:
         sys.exit('max_num_edges must be >= 8 and <= 1000000.')
 
     if args.max_ship_size < 5:

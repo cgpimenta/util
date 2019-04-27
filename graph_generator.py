@@ -66,7 +66,7 @@ def get_graph(max_size):
 def generate_graphs(max_num_nodes, max_num_edges, max_size):
     its_no_update = 0
 
-    global num_nodes, num_edges, edges, teleports
+    global num_nodes, num_edges, edges, permutation
     global path, tree, bipartite, cycle
 
     print('Max num nodes {:,}'.format(max_num_nodes))
@@ -101,6 +101,13 @@ def generate_graphs(max_num_nodes, max_num_edges, max_size):
     print("Num nodes: {:,}".format(num_nodes))
     print("Num edges: {:,}\n".format(num_edges))
 
+
+def generate_permutation(num_nodes):
+    nodes = [x for x in range(1, num_nodes + 1)]
+    np.random.shuffle(nodes)
+    return nodes
+
+
 def main(max_num_nodes, max_num_edges, max_size, seed, output_file):
     np.random.seed(seed)
 
@@ -108,22 +115,22 @@ def main(max_num_nodes, max_num_edges, max_size, seed, output_file):
     # print(max_num_edges)
     # print(max_size)
 
-    global num_nodes, num_edges, edges, teleports
+    global num_nodes, num_edges, edges, permutation
     num_nodes = 0
     num_edges = 0
     edges = []
-    teleports = []
+    permutation = []
 
     global path, tree, bipartite, cycle
     path, tree, bipartite, cycle = 0, 0, 0, 0
 
     generate_graphs(max_num_nodes, max_num_edges, max_size)
 
-    for i in range(1, num_nodes + 1):
-        teleports.append(tuple((i, i)))
+    permutation = [tuple((i+1, x))
+                   for i, x in enumerate(generate_permutation(num_nodes))]
 
-    print('path: {} - tree: {} - bipartite: {} - cycle: {}'.format(path,
-                                                                   tree, bipartite, cycle))
+    print('path: {} - tree: {} - bipartite: {} - cycle: {}' \
+        .format(path,tree, bipartite, cycle))
     print('Total:', path+tree+bipartite+cycle)
 
     with open(output_file, 'w') as f:
@@ -132,8 +139,8 @@ def main(max_num_nodes, max_num_edges, max_size, seed, output_file):
         for e in edges:
             f.write('{} {}\n'.format(e[0], e[1]))
 
-        for t in teleports:
-            f.write('{} {}\n'.format(t[0], t[1]))
+        for p in permutation:
+            f.write('{} {}\n'.format(p[0], p[1]))
 
 
 def parse_args():

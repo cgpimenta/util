@@ -23,12 +23,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import networkx as nx
-import matplotlib.pyplot as plt
 import argparse
+import copy
+import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
 import sys
-import matplotlib.pyplot as plt
 
 from networkx.algorithms.bipartite.generators import complete_bipartite_graph
 from networkx.generators.classic import path_graph, cycle_graph
@@ -83,6 +83,16 @@ def generate_graphs(max_num_nodes, max_num_edges, max_size):
         if g_nodes + num_nodes <= max_num_nodes and g_edges + num_edges <= max_num_edges:
             for e in g.edges:
                 edges.append(tuple(x+num_nodes+1 for x in e))
+            
+            nodes = [x+num_nodes+1 for x in g.nodes]
+            nodes_perm = copy.deepcopy(nodes)
+            np.random.shuffle(nodes_perm)
+
+            for i in zip(nodes, nodes_perm):
+                permutation.append(i)
+
+            # print(list(zip(nodes, nodes_perm)))
+            
             num_nodes += g_nodes
             num_edges += g_edges
 
@@ -125,9 +135,6 @@ def main(max_num_nodes, max_num_edges, max_size, seed, output_file):
     path, tree, bipartite, cycle = 0, 0, 0, 0
 
     generate_graphs(max_num_nodes, max_num_edges, max_size)
-
-    permutation = [tuple((i+1, x))
-                   for i, x in enumerate(generate_permutation(num_nodes))]
 
     print('path: {} - tree: {} - bipartite: {} - cycle: {}' \
         .format(path,tree, bipartite, cycle))
